@@ -1,13 +1,11 @@
-# You can change this base image to anything else
-# But make sure to use the correct version of Java
-FROM adoptopenjdk/openjdk11:alpine-jre
+# Stage 1: build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
+WORKDIR /app
+COPY . .
+RUN mvn clean package
 
-# Simply the artifact path
-ARG artifact=target/spring-boot-web.jar
-
+# Stage 2: run
+FROM eclipse-temurin:17-jre
 WORKDIR /opt/app
-
-COPY ${artifact} app.jar
-
-# This should not be changed
+COPY --from=build /app/target/*.jar app.jar
 ENTRYPOINT ["java","-jar","app.jar"]
